@@ -28,7 +28,7 @@ const run = async () => {
 
   // (Optional) A description of your feed
   // Ex: Top trending content from the whole network
-  const description = 'Follow specific hashtags. You can set which hashtags you follow at bsky.cleverhumans.com/tags'
+  const description = 'Follow Topics, not People. You can set which hashtags you follow at bsky.cleverhumans.com/tags'
 
   // (Optional) The path to an image to be used as your feed's avatar
   // Ex: ~/path/to/avatar.jpeg
