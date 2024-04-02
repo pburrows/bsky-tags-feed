@@ -1,10 +1,10 @@
 {
-  "name": "feed-generator",
+  "name": "bsky-tags-feed",
   "version": "1.0.0",
-  "description": "atproto feed generator starter kit",
+  "description": "Feed to help you follow hashtags and not people on BlueSky",
   "main": "index.js",
-  "repository": "git@github.com:bluesky-social/feed-generator.git",
-  "author": "dholms <dtholmgren@gmail.com>",
+  "repository": "git@github.com:pburrows/bsky-tags-feed.git ",
+  "author": "cleverpatrick <pburrows@burrowscorp.com>",
   "license": "MIT",
   "scripts": {
     "publishFeed": "ts-node scripts/publishFeedGen.ts",

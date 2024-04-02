@@ -3,33 +3,75 @@ import {
   isCommit,
 } from './lexicon/types/com/atproto/sync/subscribeRepos'
 import { FirehoseSubscriptionBase, getOpsByType } from './util/subscription'
+import { Post } from './db/schema'
 
 export class FirehoseSubscription extends FirehoseSubscriptionBase {
   async handleEvent(evt: RepoEvent) {
     if (!isCommit(evt)) return
     const ops = await getOpsByType(evt)
 
-    // This logs the text of every post off the firehose.
-    // Just for fun :)
-    // Delete before actually using
-    for (const post of ops.posts.creates) {
-      console.log(post.record.text)
+    const postsToDelete = ops.posts.deletes.map((del) => del.uri)
+    const postsToCreate: Post[] = []
+
+    for (const newPost of ops.posts.creates) {
+      const inlineTag = newPost.record.facets?.find(p => p.features.find(q => q.$type === 'app.bsky.richtext.facet#tag'))
+      if (!(inlineTag || (newPost.record.tags && newPost.record.tags.length > 0))) {
+        continue
+      }
+
+      // console.log(newPost.record.text)
+      const foundTags: string[] = []
+      for (const facet of newPost.record.facets ?? []) {
+        const tags = facet.features.filter(p => p.$type === 'app.bsky.richtext.facet#tag')
+        for (const tag of tags) {
+          foundTags.push(tag.tag + '')
+        }
+      }
+      for (const extraTags of newPost.record.tags ?? []) {
+        foundTags.push(extraTags)
+      }
+
+      const uniqueTags = [...new Set(foundTags)]
+      for (const uniqueTag of uniqueTags) {
+        postsToCreate.push(
+          {
+            uri: newPost.uri,
+            cid: newPost.cid,
+            replyParent: newPost.record?.reply?.parent.uri ?? null,
+            replyRoot: newPost.record?.reply?.root.uri ?? null,
+            indexedAt: new Date().toISOString(),
+            tag: uniqueTag.toLowerCase(),
+          },
+        )
+
+      }
+
     }
 
-    const postsToDelete = ops.posts.deletes.map((del) => del.uri)
-    const postsToCreate = ops.posts.creates
+    const x = ops.posts.creates
       .filter((create) => {
         // only alf-related posts
-        return create.record.text.toLowerCase().includes('alf')
+        const inlineTag = create.record.facets?.find(p => p.features.find(q => q.$type === 'app.bsky.richtext.facet#tag'))
+        if (inlineTag) {
+          // console.log(create.record.text)
+          return true
+        }
+        if (create.record.tags && create.record.tags.length > 0) {
+          // console.log(create.record.text, create.record.tags)
+          return true
+        }
+        // return create.record.text.toLowerCase().includes('alf')
       })
       .map((create) => {
         // map alf-related posts to a db row
+
         return {
           uri: create.uri,
           cid: create.cid,
           replyParent: create.record?.reply?.parent.uri ?? null,
           replyRoot: create.record?.reply?.root.uri ?? null,
           indexedAt: new Date().toISOString(),
+          tag: '',
         }
       })
 
