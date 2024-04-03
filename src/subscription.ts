@@ -5,6 +5,9 @@ import {
 import { FirehoseSubscriptionBase, getOpsByType } from './util/subscription'
 import { Post } from './db/schema'
 
+let lastMetricWritten = new Date()
+let newPostsMetric = 0
+
 export class FirehoseSubscription extends FirehoseSubscriptionBase {
   async handleEvent(evt: RepoEvent) {
     if (!isCommit(evt)) return
@@ -88,5 +91,28 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
         .onConflict((oc) => oc.doNothing())
         .execute()
     }
+    newPostsMetric += postsToCreate.length
+
+    // delete old stuff
+    const deletePoint = new Date()
+    deletePoint.setDate(deletePoint.getDate()-2) // delete all posts over two days old
+    const delCount = await this.db
+      .deleteFrom('post')
+      .where('indexedAt', '<', deletePoint.toISOString())
+      .executeTakeFirst()
+    if(delCount.numDeletedRows > 0) {
+      console.log((new Date()).toISOString() + ' deleted old records: ' + delCount.numDeletedRows)
+    }
+
+    const now = new Date()
+    const timeSinceLastMetric = now.getTime() - lastMetricWritten.getTime()
+    if(timeSinceLastMetric > 1000 * 60) {// 1 minute
+      console.log((new Date()).toISOString() + ' added new posts: ' + newPostsMetric)
+      newPostsMetric = 0
+      lastMetricWritten = new Date()
+
+    }
+
+
   }
 }

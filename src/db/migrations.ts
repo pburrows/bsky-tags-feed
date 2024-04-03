@@ -12,7 +12,7 @@ migrations['001'] = {
   async up(db: Kysely<unknown>) {
     await db.schema
       .createTable('post')
-      .addColumn('id', 'integer', (col => col.primaryKey()))
+      .addColumn('id', 'bigserial', (col => col.primaryKey()))
       .addColumn('uri', 'varchar')
       .addColumn('cid', 'varchar', (col) => col.notNull())
       .addColumn('replyParent', 'varchar')

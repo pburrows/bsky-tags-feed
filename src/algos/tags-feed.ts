@@ -18,7 +18,7 @@ export const handler = async (ctx: AppContext, params: QueryParams, requester: s
       did: requester,
       createdAt: (new Date()).toISOString(),
       lastSeen: (new Date()).toISOString(),
-      followingTags: JSON.stringify(['TagsFeedDirections']),
+      followingTags: JSON.stringify(['psychology', 'physiology', '']),
     }
     await ctx.db.insertInto('subscriber')
       .values(newSubscriber)
