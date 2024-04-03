@@ -9,7 +9,7 @@ export const handler = async (ctx: AppContext, params: QueryParams, requester: s
     const subscriberExists = await ctx.db
       .selectFrom('subscriber')
       .selectAll()
-      .where('did', '==', requester)
+      .where('did', '=', requester)
       .execute()
 
     let subscriber: Subscriber
