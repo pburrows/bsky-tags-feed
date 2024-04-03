@@ -18,10 +18,12 @@
     "@atproto/repo": "^0.3.2",
     "@atproto/syntax": "^0.1.2",
     "@atproto/xrpc-server": "^0.3.2",
+    "@types/morgan": "^1.9.9",
     "better-sqlite3": "^8.3.0",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "kysely": "^0.22.0",
+    "morgan": "^1.10.0",
     "multiformats": "^9.9.0",
     "pg": "^8.11.5"
   },
